@@ -28,6 +28,7 @@ class AmazonSQSPluginTest(PluginTestCase):
         self.plugin.set_option(
             'queue_url', 'https://sqs-us-east-1.amazonaws.com/12345678/myqueue', self.project
         )
+        self.plugin.set_option('endpoint_url', 'https://sqs-us-east-1.amazonaws.com', self.project)
 
         group = self.create_group(message='Hello world', culprit='foo.bar')
         event = self.create_event(
@@ -58,6 +59,7 @@ class AmazonSQSPluginTest(PluginTestCase):
             region_name='us-east-1',
             aws_access_key_id='access-key',
             aws_secret_access_key='secret-key',
+            endpoint_url='https://sqs-us-east-1.amazonaws.com',
         )
         mock_client.return_value.send_message.assert_called_once_with(
             QueueUrl='https://sqs-us-east-1.amazonaws.com/12345678/myqueue',

@@ -7,6 +7,7 @@ from sentry.utils import json
 
 from sentry_plugins.base import CorePluginMixin
 from sentry_plugins.utils import get_secret_field_config
+from sentry_plugins.validators import OptionalURLValidator
 
 
 def get_regions():
@@ -21,6 +22,14 @@ class AmazonSQSPlugin(CorePluginMixin, DataForwardingPlugin):
 
     def get_config(self, project, **kwargs):
         return [
+            {
+                'name': 'endpoint_url',
+                'label': 'Endpoint URL',
+                'type': 'text',
+                'validators': [OptionalURLValidator],
+                'placeholder': 'https://sqs-us-east-1.amazonaws.com',
+                'required': False,
+            },
             {
                 'name': 'queue_url',
                 'label': 'Queue URL',
@@ -46,6 +55,7 @@ class AmazonSQSPlugin(CorePluginMixin, DataForwardingPlugin):
         ]
 
     def forward_event(self, event, payload):
+        endpoint_url = self.get_option('endpoint_url', event.project)
         queue_url = self.get_option('queue_url', event.project)
         access_key = self.get_option('access_key', event.project)
         secret_key = self.get_option('secret_key', event.project)
@@ -66,6 +76,7 @@ class AmazonSQSPlugin(CorePluginMixin, DataForwardingPlugin):
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
             region_name=region,
+            endpoint_url=endpoint_url or None,
         )
 
         client.send_message(
